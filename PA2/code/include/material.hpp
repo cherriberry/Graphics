@@ -9,7 +9,6 @@
 #include <iostream>
 #include <glut.h>
 
-// TODO (PA2): Copy from PA1.
 class Material {
 public:
 
@@ -28,7 +27,21 @@ public:
     Vector3f Shade(const Ray &ray, const Hit &hit,
                    const Vector3f &dirToLight, const Vector3f &lightColor) {
         Vector3f shaded = Vector3f::ZERO;
-        // 
+
+        Vector3f N = hit.getNormal().normalized();
+        Vector3f L = dirToLight.normalized();
+
+        float dot_n_l = Vector3f::dot(N, L);
+        float diffuse = std::max(0.0f, dot_n_l);
+        shaded += diffuseColor * diffuse * lightColor; 
+
+        float specular = 0.0f;
+        if (dot_n_l > 1e-6f) {
+            Vector3f R = (2.0f * dot_n_l * N - L).normalized();
+            Vector3f d_r_w = -ray.getDirection().normalized();
+            specular = std::max(0.0f, Vector3f::dot(d_r_w, R));
+        }
+        shaded += specularColor * std::pow(specular, shininess) * lightColor;
         return shaded;
     }
 
